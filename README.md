@@ -1,2 +1,2 @@
-# Golden Ages
-Projeto no GitHub do modpack Golden Ages
+# Programas ComputerCraft
+Projeto no GitHub para colocar meus programas do ComputerCraft  
