@@ -373,7 +373,7 @@ elseif key == keys.q then -- Botão Q leva a Quarry
       term.write("      | Porcentagem de Conclusao: "..porcentagem.." %")
       term.setCursorPos(41,15)
       term.write("|")
-    end 
+      end 
 
     function atualizarStatus(x)
       term.setCursorPos(1,18)
@@ -439,8 +439,8 @@ elseif key == keys.q then -- Botão Q leva a Quarry
                   atualizarInfos()
                 end
       end
-    end
-    end
+        end
+      end
 
     function Quarry(camadas) do
       term.setCursorPos(1,2)
@@ -501,8 +501,8 @@ elseif key == keys.q then -- Botão Q leva a Quarry
 
         end
 
-    end
-    end
+      end
+      end
 
 
     ---
@@ -522,7 +522,7 @@ elseif key == keys.q then -- Botão Q leva a Quarry
     atualizarStatus(6) -- 18
 
     Quarry(tonumber(camadas))
-    end -- Fim do IF 13
+    end -- Fim do IF 15
   end
     function esperando_sair()
       while true do
@@ -535,7 +535,7 @@ elseif key == keys.q then -- Botão Q leva a Quarry
         term.clearLine()
         term.write("              [Creeper Chunk "..versao.."]     [X] - Sair")
       end
-    end
+     end
     function esperando_x()
       repeat
           local event, key = os.pullEvent("key")
