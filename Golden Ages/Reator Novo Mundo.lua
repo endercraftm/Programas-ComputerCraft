@@ -1,12 +1,11 @@
 -- Reator Novo Mundo
 
---versao = 0.2
+--versao = 0.3
 
 --[[    
 
     Lista de coisas para fazer
 
-    -> Sistema de Resfriamento
     -> Alarme
     -> Menus
     -> Modo Manual
@@ -15,6 +14,12 @@
 ]]--
 
 local inicio = true
+target = sensors.getAvailableTargetsforProbe("left", "Sensor", "Reactor")
+reading = sensors.getSensorReadingAsDict("left", "Sensor", target[1], "Reactor")
+local status = {"Ativado","Desativado","Resfriando...","Resfriamento Concluido"}
+local status_atual
+local valor1 = 500  -- Variaveis temporárias
+local valor2 = valor1*4 -- Variaveis temporárias
 
 function limpa_linhas(l1,l2,l3)
     for i = l1, l2 do
@@ -38,36 +43,68 @@ function sair_programa()
 
 end
 
+function calor()
+
+    rs.setBundledOutput("back",0)
+    while inicio do 
+        reading = sensors.getSensorReadingAsDict("left", "Sensor", target[1], "Reactor")
+
+        if reading.heat > 0 and reading.heat <= valor1 then
+            rs.setBundledOutput("bottom",colors.combine(colors.yellow))
+            elseif reading.heat > valor1 and reading.heat < valor2 then
+            rs.setBundledOutput("bottom",colors.combine(colors.yellow,colors.orange))
+            elseif reading.heat >= valor2 then
+            rs.setBundledOutput("bottom",colors.combine(colors.yellow,colors.orange,colors.red))
+            elseif reading.heat == 0 then
+            rs.setBundledOutput("bottom",0)
+        end
+
+        os.sleep(0.01)
+    end
+
+end
+
+function resfriamento()
+
+    if reading.heat >= valor2 then
+            
+        while true do
+
+            rs.setBundledOutput("back",colors.combine(colors.cyan,colors.lightBlue,colors.lime,colors.blue))
+            
+            if reading.heat == 0 then
+                
+                while true do 
+
+                    rs.setBundledOutput("back",colors.combine(colors.lime,colors.white))
+                
+                        if (rs.testBundledInput("bottom",colors.blue) and (reading.heat == 0)) then
+                            rs.setBundledOutput("back",0)
+                            break
+                        end
+                    os.sleep(0.5)
+
+                end
+
+                break
+            end
+            os.sleep(1)
+        end
+
+    end
+
+end
+
 function reator()
 
     while inicio do
-    
-    local target = sensors.getAvailableTargetsforProbe("left", "Sensor", "Reactor")
-    local reading = sensors.getSensorReadingAsDict("left", "Sensor", target[1], "Reactor")
-    local status = {"Ativado","Desativado","Resfriando...","Resfriamento Concluido"}
-    local status_atual
 
-    local valor1 = 750  -- Variaveis temporárias
-    local valor2 = valor1*4 -- Variaveis temporárias
-
-    if reading.heat == 0 then
-        rs.setBundledOutput("back",colors.white)
-        elseif reading.heat > 0 and reading.heat <= valor1 then
-        rs.setBundledOutput("back",colors.combine(colors.yellow))
-        elseif reading.heat > valor1 and reading.heat < valor2 then
-        rs.setBundledOutput("back",colors.combine(colors.yellow,colors.orange))
-        elseif reading.heat >= valor2 then 
-        rs.setBundledOutput("back",colors.combine(colors.yellow,colors.orange,colors.red))
-    end
+    resfriamento()
     
-    if rs.testBundledInput("back",colors.lime) then
+    if rs.testBundledInput("back",colors.green) then
         status_atual = status[1]
-        elseif not rs.testBundledInput("back",colors.lime) then
+        elseif not rs.testBundledInput("back",colors.green) then
         status_atual = status[2]
-        elseif rs.testBundledInput("back",colors.combine(colors.lightBlue,colors.cyan)) then
-        status_atual = status[3]
-        elseif rs.testBundledInput("back",colors.white) then
-        status_atual = status[4]
     end
 
     limpa_linhas(1,1,1)
@@ -82,4 +119,4 @@ end
 
 term.clear()
 term.setCursorPos(1,1)
-parallel.waitForAll(reator,sair_programa)
+parallel.waitForAll(sair_programa,calor,reator)
