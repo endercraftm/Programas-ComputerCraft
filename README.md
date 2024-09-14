@@ -22,5 +22,5 @@ Projeto no GitHub para colocar meus programas do ComputerCraft
 > 
 >     Reator Nuclear do Primeiro Reino de Endergrado
 >
->     
+>     ![Reator Novo Mundo](https://github.com/endercraftm/Programas-ComputerCraft/blob/master/Imagens/Reator_Novo_Mundo.png)
 > 
