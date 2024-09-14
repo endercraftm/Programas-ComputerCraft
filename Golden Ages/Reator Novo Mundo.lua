@@ -1,15 +1,13 @@
 -- Reator Novo Mundo
 
---versao = 0.3
+--versao = 0.5
 
 --[[    
 
     Lista de coisas para fazer
 
-    -> Alarme
     -> Menus
     -> Modo Manual
-    -> Calor Máximo ( 5000+1000*reading.size )
 
 ]]--
 
@@ -17,9 +15,7 @@ local inicio = true
 target = sensors.getAvailableTargetsforProbe("left", "Sensor", "Reactor")
 reading = sensors.getSensorReadingAsDict("left", "Sensor", target[1], "Reactor")
 local status = {"Ativado","Desativado","Resfriando...","Resfriamento Concluido"}
-local status_atual
-local valor1 = 500  -- Variaveis temporárias
-local valor2 = valor1*4 -- Variaveis temporárias
+local calor_max = 5000+1000*reading.size
 
 function limpa_linhas(l1,l2,l3)
     for i = l1, l2 do
@@ -49,13 +45,13 @@ function calor()
     while inicio do 
         reading = sensors.getSensorReadingAsDict("left", "Sensor", target[1], "Reactor")
 
-        if reading.heat > 0 and reading.heat <= valor1 then
+        if reading.heat > 0 and reading.heat <= calor_max/2 then
             rs.setBundledOutput("bottom",colors.combine(colors.yellow))
-            elseif reading.heat > valor1 and reading.heat < valor2 then
+            elseif reading.heat > calor_max/2 and reading.heat < calor_max then
             rs.setBundledOutput("bottom",colors.combine(colors.yellow,colors.orange))
-            elseif reading.heat >= valor2 then
+            elseif reading.heat >= calor_max/2 then
             rs.setBundledOutput("bottom",colors.combine(colors.yellow,colors.orange,colors.red))
-            elseif reading.heat == 0 then
+            else
             rs.setBundledOutput("bottom",0)
         end
 
@@ -64,9 +60,24 @@ function calor()
 
 end
 
+function infos(n)
+    term.setCursorPos(12,7)
+    write("                       ")
+    term.setCursorPos(16,8)
+    write("      ")
+    term.setCursorPos(18,9)
+    write("             ")
+    term.setCursorPos(4,7)
+    write("Status: "..tostring(status[n]))   
+    term.setCursorPos(4,8)
+    write("Temperatura: "..tostring(reading.heat))
+    term.setCursorPos(4,9)
+    write("Saida de Energia: "..tostring(reading.output).." EU/t")
+end
+
 function resfriamento()
 
-    if reading.heat >= valor2 then
+    if reading.heat >= calor_max then
             
         while true do
 
@@ -83,11 +94,12 @@ function resfriamento()
                             break
                         end
                     os.sleep(0.5)
-
+                infos(4)
                 end
 
                 break
             end
+            infos(3)
             os.sleep(1)
         end
 
@@ -101,16 +113,11 @@ function reator()
 
     resfriamento()
     
-    if rs.testBundledInput("back",colors.green) then
-        status_atual = status[1]
-        elseif not rs.testBundledInput("back",colors.green) then
-        status_atual = status[2]
-    end
-
-    limpa_linhas(1,1,1)
-    print("Status do Reator: "..tostring(status_atual))
-    limpa_linhas(2,2,2)
-    print("Calor: "..tostring(reading.heat))
+        if rs.testBundledInput("back",colors.green) then
+            infos(1)
+            else
+            infos(2)
+        end
 
     os.sleep(0.1)
     end
@@ -118,5 +125,17 @@ function reator()
 end
 
 term.clear()
-term.setCursorPos(1,1)
+term.setCursorPos(1,0)
+print("<=================+=================>")
+for i = 2, 17 do
+term.setCursorPos(1,i)
+write("|                                  |\n")
+end
+term.setCursorPos(1,5)
+term.write("<=================+=================>")
+term.setCursorPos(1,18)
+term.write("<=================+=================>")
+term.setCursorPos(9,3)
+term.write("[ Reator Novo Mundo ]")
+
 parallel.waitForAll(sair_programa,calor,reator)
