@@ -11,7 +11,7 @@ local versao = 1.2
 
 local coords_broca = {X = 0, Y = 0, Z = 0}
 local coords_quarry = {X = 0, Y = 0, Z = 0}
-local broca_max_esq, broca_max_dir, pos_broca
+local broca_max_esq, broca_max_dir, broca_min_alt, pos_broca
 
 local coresQuarry = {
     frente = colors.lime,
@@ -178,6 +178,7 @@ function atualizar_coords_broca()
 
     broca_max_dir = coords_quarry.X + 10
     broca_max_esq = coords_quarry.X - 3
+    broca_min_alt = coords_quarry.Y - 18
     pos_broca = coords_broca.X - broca_max_esq
  
 end
@@ -248,11 +249,11 @@ function moverManual()
             elseif (key == keys.pageDown) then
                 moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq, "manual") 
             elseif (key == keys.home) then
-                moverQuarry(coresQuarry.subirB, (coords_quarry.Y - 18) - coords_broca.Y, "manual")   
+                moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")   
         end
     
     until (key == keys.x)
-    
+
 end
 
 function moverComando()
@@ -355,7 +356,6 @@ end
 function Quarry()
 
     local ler_camadas = read() 
-    os.sleep(3)
      
     if (tonumber(ler_camadas) == nil) then
         return false
@@ -369,48 +369,40 @@ function Quarry()
     elseif (pos_broca == 0) then
         lado_broca = false
     elseif (pos_broca >= 6) then
-        moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X)
+        moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
         lado_broca = true
     elseif (pos_broca < 6) then
-        moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq)
+        moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq, "manual")
         lado_broca = false
     end
     
     for c = 1, ler_camadas do 
 
-        if (lado_broca == true) then
+        for i = 1, 13 do
 
-            for i = 0, 13 do
-
+            if (lado_broca == true) then
                 moverQuarry(coresQuarry.esquerdaB)
-                moverQuarry(coresQuarry.quebrar)
-
-            end
-            moverQuarry(coresQuarry.descerB)
-
-        elseif (lado_broca == false) then
-
-            for i = 0, 13 do
-
+            else 
                 moverQuarry(coresQuarry.direitaB)
-                moverQuarry(coresQuarry.quebrar)
-
             end
-            moverQuarry(coresQuarry.descerB)
+            moverQuarry(coresQuarry.quebrar)
 
         end
+        
+        moverQuarry(coresQuarry.descerB)
 
         atualizar_coords_broca()
         lado_broca = not lado_broca
 
     end
 
+    moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y)
+    moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X)
+
     -- print("Broca X = ", coords_broca.X)
     -- print("Quarry X = ", coords_quarry.X)
     -- print("Broxa_max_dir = ", broca_max_dir)
     -- print("Diferenca = ", broca_max_dir - coords_broca.X)
-
-    read()
 
 end
 
