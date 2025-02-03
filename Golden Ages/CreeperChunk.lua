@@ -1,590 +1,514 @@
--- Creeper Chunk
+-- TODO: 
+-- Documentar o Mover por Comandos e algumas partes do Mover Manual
+-- Criar intro ASCII do Creeper cada vez que o programa é aberto
+-- Status de progressão da Quarry
 
-repeat 
+--[ VARIAVEIS ]
 
-versao = "1.1"
+local largura, altura = term.getSize() -- 51, 19
+local versao = 1.2
 
-term.clear()
-term.setCursorPos(1,1)
-print("\n               [Creeper Chunk "..versao.."]")
-print("---------------------------------------------------")
-print("\nLista de funcoes: \n\n [M] - Mover Manual\n [D] - Mover por Comando\n [Q] - Quarry\n [X] - Sair\n [C] - Creeper")
+local coords_broca = {X = 0, Y = 0, Z = 0}
+local coords_quarry = {X = 0, Y = 0, Z = 0}
+local broca_max_esq = 0
+local broca_max_dir = 0 
+local broca_min_alt = 0 
+local pos_broca = 0
+local primeira_vez = true
 
-local event, key = os.pullEvent("key")
-
-if key == keys.m then -- Botão M leva ao Mover Manual
-
-  -- Mover Manualmente 
-
-  term.clear()
-  term.setCursorPos(1,1)
-  print("\n              [Creeper Chunk "..versao.."]     [X] - Sair")
-  print("---------------------------------------------------")
-  print("                        |")
-  print("Controles Quarry:       | Controles Broca: \n                        |")
-  print(" [W] - Ir para Frente   |  [NUM 8] - Subir")
-  print(" [S] - Ir para Atras    |  [NUM 2] - Descer")
-  print(" [D] - Ir para Direita  |  [NUM 6] - Direita")
-  print(" [A] - Ir para Esquerda |  [NUM 4] - Esquerda")
-  print(" [SPACE] - Subir        |  [NUM 5] - Quebrar")
-  print(" [SHIFT] - Descer       |  [NUM 1/3] - Max. Broca\n")
-  print("Posicao Horizontal da Broca: 13\n")
-  print("STATUS: Parado")
-
-  local brocaH = 13
-
-  while true do
-
-  local event, key = os.pullEvent("key")
-  local coresBroca = {
-      quebrar = colors.white,
-      subir = colors.magenta,
-      descer = colors.orange,
-      esquerda = colors.yellow,
-      direita = colors.lightBlue
-    }
-  local coresQuarry = {
-      subir = colors.cyan,
-      descer = colors.purple,
-      esquerda = colors.gray,
-      direita = colors.lightGray,
-      frente = colors.lime,
-      atras = colors.pink
-    }
-    
-
-
-  function limparLinhas(l1,l2)
-      for i = l1, l2 do
-          term.setCursorPos(1,i)
-          term.clearLine()
-      end 
-    end
-
-  function moverBroca(cor, vezes) do
-
-      for i = 1, vezes do
-
-      if cor == coresBroca.esquerda then 
-          brocaH = brocaH-1
-      elseif cor == coresBroca.direita then
-          brocaH = brocaH+1
-      end
-
-      if brocaH > 13 then
-        brocaH = 13
-      elseif brocaH < 0 then
-        brocaH = 0
-      end
-          
-      limparLinhas(17, 17)
-      print("STATUS: Movendo Broca...")
-      rs.setBundledOutput("left", cor)
-      os.sleep(0.5)
-      rs.setBundledOutput("left", 0)
-      limparLinhas(15, 17)
-      print("STATUS: Carregando...")
-      term.setCursorPos(1, 15)
-      print("Posicao Horizontal da Broca: "..brocaH)
-      os.sleep(0.5)
-
-      end
-
-      
-
-      limparLinhas(17, 17)
-      print("STATUS: Parado")
-    end
-    end
-    
-  function moverQuarryManual(cor, vezes) do
-      for i = 1, vezes do
-      limparLinhas(17, 17)
-      print("STATUS: Movendo Quarry...")
-      rs.setBundledOutput("left", cor)
-      os.sleep(0.5)
-      rs.setBundledOutput("left", 0)
-      limparLinhas(17, 17)
-      print("STATUS: Carregando...")
-      os.sleep(2)
-      end
-      limparLinhas(17, 17)
-      print("STATUS: Parado")
-    end
-    end
-
-  --  
-  -- MOVER QUARRY
-  --
-    if key == keys.w then -- W para mover a Quarry para frente
-        moverQuarryManual(coresQuarry.frente, 1)
-      elseif key == keys.s then -- S para mover a Quarry para atrás
-        moverQuarryManual(coresQuarry.atras, 1)
-      elseif key == keys.d then -- D para mover a Quarry para direita
-        moverQuarryManual(coresQuarry.direita, 1)
-      elseif key == keys.a then -- A para mover a Quarry para esquerda
-        moverQuarryManual(coresQuarry.esquerda, 1)
-      elseif key == keys.space then -- SPACE para mover a Quarry para cima
-        moverQuarryManual(coresQuarry.subir, 1)
-      elseif key == 42 or key == 54 then -- LSHIFT ou RSHIFT para mover a Quarry para baixo
-        moverQuarryManual(coresQuarry.descer, 1)
-      --  
-      -- MOVER BROCA
-      --
-      elseif key == 72 then -- NUMPAD 8 para mover a Broca para cima
-        moverBroca(coresBroca.subir, 1)
-      elseif key == 80 then -- NUMPAD 2 para mover a Broca para baixo
-        moverBroca(coresBroca.descer, 1)
-      elseif key == 77 then -- NUMPAD 6 para mover a Broca para direita
-        moverBroca(coresBroca.direita, 1)
-      elseif key == 75 then -- NUMPAD 4 para mover a Broca para esquerda
-        moverBroca(coresBroca.esquerda, 1)
-      elseif key == 79 then -- NUMPAD 1 para mover a Broca até a extrema esquerda
-        moverBroca(coresBroca.esquerda, brocaH) 
-      elseif key == 81 then -- NUMPAD 3 para mover a Broca até a extrema direita
-        moverBroca(coresBroca.direita, 13-brocaH) 
-      elseif key == 76 then -- NUMPAD 5 para ativar os Block Breakers da Broca
-        moverBroca(coresBroca.quebrar, 1) 
-      elseif key == keys.x then -- X para voltar ao Menu Inicial
-        break
-      end
-    end
-
-elseif key == keys.d then -- Botão D leva ao Mover por Comando
-
-  -- Mover por Comando
-  term.clear()
-  term.setCursorPos(1,1)
-  print("\n              [Creeper Chunk "..versao.."]     [X] - Sair")
-  print("---------------------------------------------------\n")
-  print("Lista de Comandos: \n")
-  print("  Esquerda   |    Esquerda Broca")
-  print("  Direita    |    Direita Broca")
-  print("  Frente     |    Cima Broca")
-  print("  Atras      |    Baixo Broca")
-  print("  Cima       |    Quebrar Broca")
-  print("  Baixo      |    Chunk")
-  print("\nPara onde voce quer ir?\n")
-
-  term.write("> ")
-
-  while true do
-
-  local event, key = os.pullEvent("key")
-
-  local coresBroca = {
-    quebrar = colors.white,
-    subir = colors.magenta,
-    descer = colors.orange,
-    esquerda = colors.yellow,
-    direita = colors.lightBlue
-    }
-  local coresQuarry = {
+local coresQuarry = {
+    frente = colors.lime,
+    atras = colors.pink,
+    direita = colors.lightGray,
+    esquerda = colors.gray,
     subir = colors.cyan,
     descer = colors.purple,
-    esquerda = colors.gray,
-    direita = colors.lightGray,
-    frente = colors.lime,
-    atras = colors.pink
-    }
+    subirB = colors.magenta,
+    descerB = colors.orange,
+    direitaB = colors.lightBlue,
+    esquerdaB = colors.yellow,
+    quebrar = colors.white
+}
 
-  function limparLinhas(l1,l2)
-    for i = l1, l2 do
-        term.setCursorPos(1,i)
-        term.clearLine()
-    end
-    end
+local comandos = {
+    "Frente",
+    "Atras",
+    "Direita",
+    "Esquerda",
+    "Subir",
+    "Descer",
+    "Broca",
+    "Chunk"
+}
 
-  function moverBroca(cor, vezes) do
+--[ FUNÇÕES ]
 
-    for i = 1, vezes do
+function menus(opc)
 
-      limparLinhas(17, 17)
-      print("STATUS: Movendo Broca...")
-      rs.setBundledOutput("left", cor)
-      os.sleep(0.5)
-      rs.setBundledOutput("left", 0)
-      limparLinhas(17,17)
-      print("STATUS: Carregando...")
-      os.sleep(0.5)
-
-    end
-    limparLinhas(17, 17)
-    print("STATUS: Parado")
-    end
-    end
-
-  function moverQuarry(cor, vezes) do
-    for i = 1, vezes do
-    limparLinhas(17,17)
-    print("STATUS: Movendo Quarry...")
-    rs.setBundledOutput("left", cor)
-    os.sleep(0.5)
-    rs.setBundledOutput("left", 0)
-    limparLinhas(17,17)
-    print("STATUS: Carregando...")
-    os.sleep(5)
-    end
-    end
-   end
-
-  --
-  -- COMANDO
-  --
-
-  limparLinhas(17,17)
-  term.write("> ")
-  local comando = string.lower(read())
-
-  local direcao = string.match(comando, "(%a+)[^broca$+]")
-  local direcaoB = string.match(comando, "(broca)")
-  local numeroVezes = tonumber(string.match(comando, "(%d+)"))
-  --
-  -- COMANDOS QUARRY
-  --
-  if direcao == "frente" and direcaoB ~= "broca" then -- Mover a Quarry para frente (numeroVezes) vezes
-    moverQuarry(coresQuarry.frente, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif direcao == "atras" and direcaoB ~= "broca" then -- Mover a Quarry para atras (numeroVezes) vezes
-    moverQuarry(coresQuarry.atras, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif direcao == "direita" and direcaoB ~= "broca" then -- Mover a Quarry para direita (numeroVezes) vezes
-    moverQuarry(coresQuarry.direita, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif direcao == "esquerda" and direcaoB ~= "broca" then -- Mover a Quarry para esquerda (numeroVezes) vezes
-    moverQuarry(coresQuarry.esquerda, numeroVezeseroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif (direcao == "cima" or direcao == "subir" or direcao == "acima") and direcaoB ~= "broca" then -- Mover a Quarry para cima (numeroVezes) vezes
-    moverQuarry(coresQuarry.subir, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif (direcao == "baixo" or direcao == "descer" or direcao == "abaixo") and direcaoB ~= "broca" then -- Mover a Quarry para baixo (numeroVezes) vezes
-    moverQuarry(coresQuarry.descer, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  --
-  -- COMANDOS BROCAS
-  --
-  elseif direcao == "direita" and direcaoB == "broca" then -- Mover a Broca para direita (numeroVezes) vezes
-    moverQuarry(coresBroca.direita, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif direcao == "esquerda" and direcaoB == "broca" then -- Mover a Broca para esquerda (numeroVezes) vezes
-    moverQuarry(coresBroca.esquerda, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif (direcao == "cima" or direcao == "subir" or direcao == "acima") and direcaoB == "broca" then -- Mover a Broca para cima (numeroVezes) vezes
-    moverQuarry(coresBroca.subir, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif (direcao == "baixo" or direcao == "descer" or direcao == "abaixo") and direcaoB == "broca" then -- Mover a Broca para baixo (numeroVezes) vezes
-    moverQuarry(coresBroca.descer, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif (direcao == "quebrar" or direcao == "minerar" or direcao == "cavar") and direcaoB == "broca" then -- Ativa os Block Breakers da Broca (numeroVezes) vezes
-    moverQuarry(coresBroca.quebrar, numeroVezes)
-    limparLinhas(17,17)
-    term.write("> ")
-  elseif key == keys.x or direcao == "x" then -- X para voltar ao Menu Inicial
-    break
-  end
-
- end
-elseif key == keys.q then -- Botão Q leva a Quarry
-    -- Modo Quarry
-  while true do 
     term.clear()
-    term.setCursorPos(1,1)
-    print("\n              [Creeper Chunk "..versao.."]     [X] - Sair")
-    print("---------------------------------------------------\n")
-    print("Quantas camadas voce deseja cavar?\n")
-    term.write(" >")
-    local camadas = read()
 
-    if tonumber(camadas) == nil then
-      break
-    else
+    for i = 2, altura do                   -- Barras verticais
 
-    -- ]]
-    -- VARIAVEIS
-    -- ]]
+        term.setCursorPos(2,i)             -- Cria as barras verticais
+        write("|")                         -- Barras da esquerda
+        term.setCursorPos(largura-1,i)     --
+        write("|")                         -- Barras da direita
 
-    local coresBroca = {
-        quebrar = colors.white,
-        subir = colors.magenta,
-        descer = colors.orange,
-        esquerda = colors.yellow,
-        direita = colors.lightBlue
-      }
-    local coresQuarry = {
-        subir = colors.cyan,
-        descer = colors.purple,
-        esquerda = colors.gray,
-        direita = colors.lightGray,
-        frente = colors.lime,
-        atras = colors.pink
-      }
-    local statusFases = {
-      "Movendo Broca...",
-      "Movendo Quarry...",
-      "Mineirando...",
-      "Carregando...",
-      "Resetando...",
-      "Parado",
-      "Terminado"
-      } 
+    end
 
-    local brocaH = 13
-    local camadasCavadas = 0
-    local porcentagem = 0
-    local x = 0
+    for i = 1, altura, altura-1 do
+        term.setCursorPos(2,i)
+        write("+-----------------------------------------------+") -- Cria as barras horizontais
+    end
 
-    -- ]]
-    -- FUNÇÕES
-    -- ]]
+    if (opc == 0) then
+        
+        term.setCursorPos(2,10)
+        write("+-----------------------------------------------+") -- Cria a barra horizontal do meio no menu principal
 
-    function limparLinhas(l1,l2,l3)
-        for i = l1, l2 do
+        term.setCursorPos(19,5)
+        write("Creeper Chunk")                                     -- 
+        term.setCursorPos(22,7)                                    -- Cria o titulo e a versão do programa
+        print("[ ",tostring(versao)," ]")                          --
+
+        term.setCursorPos(6,13)
+        write("[A] - Mover Manual       [B] - Comandos")           --
+        term.setCursorPos(6,16)                                    -- Opções
+        write("[C] - Quarry             [D] - Sair")               --
+
+    elseif (opc == 1) then
+        
+            term.setCursorPos(20,3)
+            write("Mover Manual")
+            term.setCursorPos(2,5)
+            write("+---[ Quarry ]----------+---[ Broca ]-----------+")
+            term.setCursorPos(26,altura)
+            write("+")
+
+            term.setCursorPos(6,7)
+            write("[W] - Frente             [^] - Subir")
+            term.setCursorPos(6,8)
+            write("[S] - Atras              [V] - Descer")
+            term.setCursorPos(6,9)
+            write("[D] - Direita            [>] - Direita")
+            term.setCursorPos(6,10)
+            write("[A] - Esquerda           [<] - Esquerda")
+            term.setCursorPos(6,11)
+            write("[SPACE] - Subir          [ENTER] - Quebrar")
+            term.setCursorPos(6,12)
+            write("[SHIFT] - Descer         [PgU/D] - Extremos")
+            term.setCursorPos(6,13)
+            write("                         [HOME] - RST Broca")
+        
+            for j = altura-1, 6, -1 do                   
+                term.setCursorPos(26,j)             
+                write("|")                        
+            end
+
+    elseif (opc == 2) then
+
+        term.setCursorPos(17,3)
+        write("Mover por Comandos")
+        term.setCursorPos(5,6)
+        write("[ Comandos ]        [ Complementos ]")
+
+        for i = 5, 15, 10 do
+            term.setCursorPos(2,i)
+            write("+-----------------------------------------------+")
+            term.setCursorPos(22,i)
+            write("+")
+            end
+
+        for i = 6, 14 do
+            term.setCursorPos(22,i)
+            write("|") 
+        end
+
+        for i = 1, #comandos do
+            if (i < 7) then
+                term.setCursorPos(7,7+i)
+                write(comandos[i])
+            else
+                term.setCursorPos(26,1+i)
+                write(comandos[i])
+            end
+        end
+
+        for i = 16, 19 do
             term.setCursorPos(1,i)
             term.clearLine()
         end
-        term.setCursorPos(1,l3)
-      end -- Fim do Limpar Linhas
-      
-    function atualizarInfos()
-      term.setCursorPos(1,11)
-      term.clearLine()
-      term.write("      | Posicao Horizontal da Broca: "..brocaH)
-      term.setCursorPos(41,11)
-      term.write("|")
 
-      term.setCursorPos(1,13)
-      term.clearLine()
-      term.write("      | Camadas cavadas: "..camadasCavadas)
-      term.setCursorPos(41,13)
-      term.write("|")
+        term.setCursorPos(4,17)
+        write("Para onde voce deseja ir?\n")
 
-      term.setCursorPos(1,15)
-      term.clearLine()
-      term.write("      | Porcentagem de Conclusao: "..porcentagem.." %")
-      term.setCursorPos(41,15)
-      term.write("|")
-      end 
+    
+    elseif (opc == 3) then
 
-    function atualizarStatus(x)
-      term.setCursorPos(1,18)
-      term.clearLine()
-      print("STATUS: "..statusFases[x])
-      end
+        term.setCursorPos(23,3) 
+        write("Quarry")
+        term.setCursorPos(2,5)
+        write("+-----------------------------------------------+")
+        -- term.setCursorPos(9,9)
+        -- write("Quantas camadas voce deseja cavar?")
+        term.setCursorPos(12,7)
+        write("Qual modo voce deseja usar?")
+        term.setCursorPos(8,9)
+        write("[1] - Automatico       [2] - Manual")
+        term.setCursorPos(8,10)
+        write("[3] - Furar")
+        -- term.setCursorPos(23,11)
+        -- write("> ")
 
-    function moverBroca(cor, vezes) do
+    end
 
-        for i = 1, vezes do
-
-        if cor == coresBroca.esquerda then 
-            brocaH = brocaH-1
-        elseif cor == coresBroca.direita then
-            brocaH = brocaH+1
-        elseif cor == coresBroca.descer then 
-            camadasCavadas = camadasCavadas+1
-        end
-
-        if brocaH > 13 then
-          brocaH = 13
-        elseif brocaH < 0 then
-          brocaH = 0
-        end
-
-      rs.setBundledOutput("left", cor)
-      os.sleep(0.5)
-      rs.setBundledOutput("left", 0)
-      os.sleep(0.5)
-
-        end
-
-      end
-      end -- Fim do Mover Broca
-
-    function Reset(camadas) do
-      atualizarStatus(5)
-      if camadas < 2 then
-          for i = 1, 13 do
-            rs.setBundledOutput("left", coresBroca.direita)
-            os.sleep(0.5)
-            rs.setBundledOutput("left", 0)
-            os.sleep(0.5)
-            brocaH = brocaH+1
-            atualizarInfos()
-          end
-        elseif math.fmod(camadas, 2) == 1 then
-          moverBroca(coresBroca.subir, camadas-1)
-                for d = 1, 13 do
-                  rs.setBundledOutput("left", coresBroca.direita)
-                  os.sleep(0.5)
-                  rs.setBundledOutput("left", 0)
-                  os.sleep(0.5)
-                  atualizarInfos()
-                end
-        elseif math.fmod(camadas, 2) == 0 then
-          moverBroca(coresBroca.subir, camadas)
-                for d = 1, 13 do
-                  rs.setBundledOutput("left", coresBroca.direita)
-                  os.sleep(0.5)
-                  rs.setBundledOutput("left", 0)
-                  os.sleep(0.5)
-                  atualizarInfos()
-                end
-      end
-        end
-      end
-
-    function Quarry(camadas) do
-      term.setCursorPos(1,2)
-      term.clearLine()
-      print("              [Creeper Chunk "..versao.."]                ")
-        if camadas < 2 then
-          atualizarStatus(3)
-          for i = 1, 13 do
-            moverBroca(coresBroca.quebrar, 1)
-            moverBroca(coresBroca.esquerda, 1)
-            porcentagem = tonumber(string.sub(tostring((100*(i/13))),0,3))
-            atualizarInfos()
-          end
-          moverBroca(coresBroca.quebrar, 1)
-          camadasCavadas = camadasCavadas+1 
-          atualizarInfos()
-          Reset(camadas)
-          atualizarStatus(7)
-            
-        else
-          atualizarStatus(3)
-          for a = 1, math.floor(camadas/2) do
-          for e = 1, 13 do
-            moverBroca(coresBroca.quebrar, 1)
-            moverBroca(coresBroca.esquerda, 1)
-            x = x+1
-            porcentagem = tonumber(string.sub(tostring((100*((camadasCavadas+x)/(camadas*13)))),0,3))
-            atualizarInfos()
-          end
-            moverBroca(coresBroca.quebrar, 1)
-            moverBroca(coresBroca.descer, 1)
-            atualizarInfos()
-          for d = 1, 13 do
-            moverBroca(coresBroca.quebrar, 1)
-            moverBroca(coresBroca.direita, 1)
-            x = x+1
-            porcentagem = tonumber(string.sub(tostring((100*(x/(camadas*13)))),0,3))
-            atualizarInfos()
-          end
-            moverBroca(coresBroca.quebrar, 1)
-            moverBroca(coresBroca.descer, 1)
-            atualizarInfos()
-            if a == math.floor(camadas/2) and math.fmod(camadas, 2) == 1 then
-              camadasCavadas = camadasCavadas+1
-              for e = 1, 13 do
-                moverBroca(coresBroca.quebrar, 1)
-                moverBroca(coresBroca.esquerda, 1)
-                x = x+1
-                porcentagem = tonumber(string.sub(tostring((100*(x/(camadas*13)))),0,3))
-                atualizarInfos()
-              end
-              moverBroca(coresBroca.quebrar, 1)  
-            end
-            Reset(camadas)
-            atualizarInfos()
-            atualizarStatus(7)
-          end
-
-        end
-
-      end
-      end
-
-
-    ---
-    ---  Quarry Menu
-    ---
-
-    limparLinhas(6,8,7)
-
-    print("           <====[ Modo Quarry ]====>\n\n") -- 7
-    print("      -----------------------------------") -- 10
-    print("      | Posicao Horizontal da Broca: 13 |") -- 11
-    print("      |                                 |") -- 12
-    print("      | Camadas cavadas: 0              |") -- 13
-    print("      |                                 |") -- 14
-    print("      | Porcentagem de Conclusao: 0 %   |") -- 15
-    print("      -----------------------------------\n") -- 16
-    atualizarStatus(6) -- 18
-
-    Quarry(tonumber(camadas))
-    end -- Fim do IF 15
-  end
-    function esperando_sair()
-      while true do
-        term.setCursorPos(1,2)
-        os.sleep(0.5)
-        term.clearLine()
-        term.write("              [Creeper Chunk "..versao.."]                ")
-        os.sleep(0.5)
-        term.setCursorPos(1,2)
-        term.clearLine()
-        term.write("              [Creeper Chunk "..versao.."]     [X] - Sair")
-      end
-     end
-    function esperando_x()
-      repeat
-          local event, key = os.pullEvent("key")
-      until key == keys.x
-      
-  
-  parallel.waitForAny(esperando_sair, esperando_x)
-  end
-
-elseif key == keys.c then -- Botão C leva ao Creeper
-  term.clear()
-  term.setCursorPos(1,1)
-  print("    :::::::::::       :::::::::::    ")
-  os.sleep(0.2)
-  print("    :::::::::::       :::::::::::    ")
-  os.sleep(0.2)
-  print("    :::::::::::       :::::::::::    ")
-  os.sleep(0.2)
-  print("    :::::::::::       :::::::::::    ")
-  os.sleep(0.2)
-  print("    :::::::::::       :::::::::::    ")
-  os.sleep(0.1)
-  print("                                     ")
-  os.sleep(0.1)
-  print("            ::::::::::::           ")
-  os.sleep(0.2)
-  print("            ::::::::::::           ")
-  os.sleep(0.2)    
-  print("       ::::::::::::::::::::::       ")
-  os.sleep(0.2)
-  print("       ::::::::::::::::::::::       ")
-  os.sleep(0.2)
-  print("       ::::::::::::::::::::::       ")
-  os.sleep(0.2)
-  print("       ::::::::::::::::::::::       ")
-  os.sleep(0.2)
-  print("       ::::::::      ::::::::      ")
-  os.sleep(0.2)
-  print("       ::::::::      ::::::::  ")
-
-  print("\n\n[X] - Sair")
-  repeat 
-      local event, key = os.pullEvent()
-  until key == keys.x
-  os.sleep(0.1)
 end
 
-until key == keys.x 
+function atualizar_coords()
+    rednet.open("right")
 
-term.clear()
-term.setCursorPos(1,1)
+    while (coords_quarry.X == 0 or coords_quarry.Y == 0) do
+        coords_quarry.X, coords_quarry.Y, coords_quarry.Z = gps.locate(3)    
+    end
 
+    broca_max_dir = coords_quarry.X + 10
+    broca_max_esq = coords_quarry.X - 3
+    broca_min_alt = coords_quarry.Y - 18
+
+    rednet.send(8, "coords")
+
+    local id, msg, dist, coordenadas
+
+        repeat
+
+            id, msg, dist = rednet.receive()
+
+            if (msg ~= "PING") then
+                coordenadas = msg
+            end
+        
+        until (msg ~= "PING")
+
+    rednet.close("right")
+    
+    coords_broca.X = tonumber(string.match(coordenadas, "^%d+"))
+    coords_broca.Y = tonumber(string.match(coordenadas, " %d+ "))
+    coords_broca.Z = tonumber(string.match(coordenadas, "%d+$"))
+
+    pos_broca = coords_broca.X - broca_max_esq
+ 
+end
+
+function moverQuarry(cor, vezes, modo)
+
+    if (vezes == nil) then
+        vezes = 1
+    elseif (vezes == 0) then
+        return false
+    end
+
+    if (modo == nil or modo == "") then
+        modo = "comando"
+    end
+
+    local t
+
+    if (cor >= 32 and modo == "comando") then
+        t = 3
+    else 
+        t = 0.5
+    end
+
+    for i = 1, vezes do
+        rs.setBundledOutput("left", cor)
+        os.sleep(0.5)
+        rs.setBundledOutput("left", 0)
+        os.sleep(t)
+    end
+
+    return true
+
+end
+
+function moverManual()
+
+    repeat 
+
+        local event, key = os.pullEvent("key")
+    
+        if (key == keys.w) then
+                broca_max_esq = 0
+                broca_max_dir = 0
+                moverQuarry(coresQuarry.frente, 1, "manual")
+            elseif (key == keys.s) then
+                broca_max_esq = 0
+                broca_max_dir = 0
+                moverQuarry(coresQuarry.atras, 1, "manual")
+            elseif (key == keys.d) then
+                moverQuarry(coresQuarry.direita, 1, "manual")
+            elseif (key == keys.a) then
+                moverQuarry(coresQuarry.esquerda, 1, "manual")
+            elseif (key == keys.space) then
+                broca_min_alt = 0
+                moverQuarry(coresQuarry.subir, 1, "manual")
+            elseif (key == keys.leftShift) then
+                broca_min_alt = 0
+                moverQuarry(coresQuarry.descer, 1, "manual")
+            elseif (key == keys.up) then
+                moverQuarry(coresQuarry.subirB, 1, "manual")
+            elseif (key == keys.down) then
+                moverQuarry(coresQuarry.descerB, 1, "manual")
+            elseif (key == keys.right) then
+                moverQuarry(coresQuarry.direitaB, 1, "manual")
+            elseif (key == keys.left) then
+                moverQuarry(coresQuarry.esquerdaB, 1, "manual")
+            elseif (key == keys.enter) then
+                moverQuarry(coresQuarry.quebrar, 1, "manual") 
+            elseif (key == keys.pageUp) then
+                atualizar_coords()
+                moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
+            elseif (key == keys.pageDown) then
+                atualizar_coords()
+                moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq, "manual")   
+            elseif (key == keys.home) then
+                atualizar_coords()
+                moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")   
+        end
+    
+    until (key == keys.x)
+
+end
+
+function moverComando()
+
+    repeat
+
+        atualizar_coords()
+
+        term.setCursorPos(4,18)
+        write("> ") 
+        local ler_comando = (string.lower(tostring(read())))
+        local function acharComandos(n)
+
+            local function tirarEspaco(str)
+                return string.match(tostring(str), "(%S+)")
+            end
+
+            if (n == 1) then
+
+                for i = 1, #comandos-1 do 
+                    local pegar_comando = string.match(ler_comando, tostring("^"..string.lower(comandos[i]).." ?") )
+                    local sem_espaco = tirarEspaco(pegar_comando)
+
+                    if (string.lower(comandos[i]) == sem_espaco) then
+                        return sem_espaco
+                    end
+                end
+            
+            elseif (n == 2) then
+                local com_broca = string.match(ler_comando, " +broca ?")
+                local com_chunk = string.match(ler_comando, " +chunks? ?")
+
+                if (com_broca == nil) then 
+                    return tirarEspaco(tostring(com_chunk))
+                else
+                    return tirarEspaco(tostring(com_broca))
+                end 
+                
+            end
+            
+        end
+        
+        local parametros_comando = {acharComandos(1), acharComandos(2), tonumber(string.match(ler_comando, "%d+$"))}
+
+        if (parametros_comando[1] == nil) then
+            print("erro sem parametro 1")
+        else
+
+            if (parametros_comando[2] == "broca") then
+
+                if (parametros_comando[1] == "direita") then
+                    moverQuarry(coresQuarry.direitaB, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "esquerda") then
+                    moverQuarry(coresQuarry.esquerdaB, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "subir" or parametros_comando[1] == "atras") then
+                    moverQuarry(coresQuarry.subirB, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "descer" or parametros_comando[1] == "frente") then
+                    moverQuarry(coresQuarry.descerB, parametros_comando[3], "comando")
+                end
+
+            elseif (parametros_comando[2] == "chunk" or parametros_comando[2] == "chunks") then 
+
+                if (parametros_comando[1] == "frente") then 
+                    broca_max_esq = 0
+                    broca_max_dir = 0
+                    moverQuarry(coresQuarry.frente, parametros_comando[3]*16, "comando")
+                elseif (parametros_comando[1] == "atras") then
+                    broca_max_esq = 0
+                    broca_max_dir = 0
+                    moverQuarry(coresQuarry.atras, parametros_comando[3]*16, "comando")
+                elseif (parametros_comando[1] == "direita") then
+                    moverQuarry(coresQuarry.direita, parametros_comando[3]*16, "comando")
+                elseif (parametros_comando[1] == "esquerda") then
+                    moverQuarry(coresQuarry.esquerda, parametros_comando[3]*16, "comando")
+                elseif (parametros_comando[1] == "subir") then
+                    broca_min_alt = 0
+                    moverQuarry(coresQuarry.subir, parametros_comando[3]*16, "comando")
+                elseif (parametros_comando[1] == "descer") then
+                    broca_min_alt = 0
+                    moverQuarry(coresQuarry.descer, parametros_comando[3]*16, "comando")
+                end
+
+            else
+
+                if (parametros_comando[1] == "frente") then 
+                    moverQuarry(coresQuarry.frente, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "atras") then
+                    moverQuarry(coresQuarry.atras, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "direita") then
+                    moverQuarry(coresQuarry.direita, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "esquerda") then
+                    moverQuarry(coresQuarry.esquerda, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "subir") then
+                    moverQuarry(coresQuarry.subir, parametros_comando[3], "comando")
+                elseif (parametros_comando[1] == "descer") then
+                    moverQuarry(coresQuarry.descer, parametros_comando[3], "comando")
+                end
+
+            end 
+        
+        end
+
+    until (ler_comando == "x")
+end
+
+function Quarry()
+
+    atualizar_coords()
+    local event, key = os.pullEvent("key")
+    local ler_camadas
+    
+    if (key == 2) then
+
+        term.setCursorPos(16,3) 
+        write("Quarry - Automatico")
+        ler_camadas = coords_broca.Y - 7
+
+    elseif (key == 3) then
+
+        term.setCursorPos(18,3) 
+        write("Quarry - Manual")
+        term.setCursorPos(12,7)
+        write("                           ")
+        term.setCursorPos(8,9)
+        write("Quantas camadas voce deseja cavar? ")
+        term.setCursorPos(23,11)
+        write("> ")
+        ler_camadas = read() 
+        ler_camadas = tonumber(ler_camadas)
+
+        if (ler_camadas == nil or ler_camadas <= 0) then
+            return false
+        end
+
+    elseif (key == 4) then
+
+        term.setCursorPos(18,3) 
+        write("Quarry - Furar  ")
+        ler_camadas = coords_broca.Y - 8
+        
+        for i = 1, ler_camadas do
+            moverQuarry(coresQuarry.quebrar)
+            moverQuarry(coresQuarry.descerB)
+        end
+        moverQuarry(coresQuarry.quebrar)
+
+        atualizar_coords()
+        moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")
+        moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
+
+        return true
+
+    else
+        return false
+    end
+    
+    local lado_broca
+
+    if (pos_broca == 13) then
+        lado_broca = true
+    elseif (pos_broca == 0) then
+        lado_broca = false
+    elseif (pos_broca >= 6) then
+        moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
+        lado_broca = true
+    elseif (pos_broca < 6) then
+        moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq, "manual")
+        lado_broca = false
+    end
+    
+    for c = 1, ler_camadas do 
+
+        if (lado_broca == true) then
+
+            for i = 1, 13 do
+
+                moverQuarry(coresQuarry.quebrar)
+                moverQuarry(coresQuarry.esquerdaB)
+    
+            end
+            moverQuarry(coresQuarry.quebrar)
+            moverQuarry(coresQuarry.descerB)
+
+        elseif (lado_broca == false) then
+
+            for i = 1, 13 do
+
+                moverQuarry(coresQuarry.quebrar)
+                moverQuarry(coresQuarry.direitaB)
+    
+            end
+            moverQuarry(coresQuarry.quebrar)
+            moverQuarry(coresQuarry.descerB)
+            
+        end
+        
+        lado_broca = not lado_broca
+
+    end
+
+    atualizar_coords()
+    moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")
+    moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
+
+end
+
+--[ INICIO ]
+
+menus(0)
+
+repeat
+
+atualizar_coords()
+local event, key = os.pullEvent("key")
+
+if (key == keys.a) then
+        menus(1)
+        moverManual() 
+        menus(0)
+    elseif (key == keys.b) then
+        menus(2)
+        moverComando()
+        menus(0)
+    elseif (key == keys.c or key == keys.q) then
+        menus(3)
+        Quarry()
+        menus(0)
+end
+
+if (primeira_vez == true) then
+    primeira_vez = false
+end
+
+until (key == keys.x or key == keys.d)
+rednet.close("right")

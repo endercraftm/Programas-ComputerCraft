@@ -1,319 +1,554 @@
--->> Bombinha
+-- TODO:
+-- Documentação
 
--->> Glossario:
+-- VARIÁVEIS
 
--- SPT: Suplementos Para Turtles
--- SLP: Sistema Logistic Pipes
+local profundidade, largura, altura
+local direcao = {
+    {"Direita",false},
+    {"Esquerda",false}
+}
 
-versao = "1.0"
+local opc_selecionada = 1
+local versao = 1.0
 
-combustivel = turtle.getFuelLevel()
-dir_esq = true
+local ligar_programa = true
+local escolher_dir = true
+local escolher_preencher = true
 
-function limparLinhas(l1,l2,l3)
-    for i = l1, l2 do
+-- FUNÇÕES
+
+function limpar_tela()
+
+    for i = 6, 12 do 
         term.setCursorPos(1,i)
         term.clearLine()
     end
-    term.setCursorPos(1,l3)
-end
 
-function encher_tanque(f) -- Pega 1 stack de Combustivel do Ender Chest SPT 
+end 
 
-        for i = 1, 2 do
-            turtle.turnRight()
-        end
+function esvaziar_inventario()
 
-        while turtle.detect() == true do
-            turtle.dig()
-        end
-    
-        turtle.select(15)
-        turtle.place()
-        turtle.select(1)
-        turtle.suck()
-        turtle.refuel(f)
-        turtle.select(15)
-        turtle.dig()
-
-        for i = 1, 2 do
-            turtle.turnLeft()
-        end
-
-end
-
-function esvaziar_inv() -- Transfere todos os itens dos slots 2-14 para o Ender Chest SLP
-
-    for i = 1, 2 do
-        turtle.turnRight()
-    end
-
-    while turtle.detect() == true do
-        turtle.dig()
-    end
+    turtle.turnRight()
+    turtle.turnRight()
+    while turtle.detect() do turtle.dig() end 
 
     turtle.select(16)
-    turtle.place()
-    for i = 2, 14 do
-        turtle.select(i)
-        turtle.drop()
+    while not turtle.place() do 
+        turtle.dig()
+        os.sleep(1) 
+    end  
+    turtle.select(1)
+
+    if turtle.refuel(1) then
+        for i = 2, 14 do
+            turtle.select(i)
+            turtle.drop()
+        end
+    else 
+        for i = 1, 14 do
+            turtle.select(i)
+            turtle.drop()
+        end 
     end
+
     turtle.select(16)
     turtle.dig()
+    turtle.turnRight()
+    turtle.turnRight()
 
-    for i = 1, 2 do
-        turtle.turnLeft()
-    end        
+end 
+
+function encher_combustivel()
+
+    turtle.turnRight()
+    turtle.turnRight()
+    while turtle.detect() do turtle.dig() end 
+
+    turtle.select(15)
+    while not turtle.place() do 
+        turtle.dig()
+        os.sleep(1) 
+    end 
+    turtle.select(1)
+    turtle.suck()
+    turtle.refuel(1)
+    turtle.drop(63)
+    turtle.select(15)
+    turtle.dig()
+    turtle.turnRight()
+    turtle.turnRight()
 
 end
 
-function se_encher(x,y,z)
-    if (combustivel < (x*y*z) and turtle.getItemCount(1) < (math.floor((x*y*z)/96)+1)) then
-        encher_tanque(math.floor((x*y*z)/96)+1)
-    elseif (combustivel < (x*y*z) and turtle.getItemCount(1) >= (math.floor((x*y*z)/96)+1)) then
-        turtle.select(1)
-        turtle.refuel(math.floor((x*y*z)/96)+1)
-    end
-end
+function escavar(x, z, y)
 
-function se_esvaziar()
-    if turtle.getItemSpace(14) < 64 then
-        esvaziar_inv()
-    end
-end
+    local total = y*z
+    local vez_executada = 1 
 
-function voltar(x,y,z)
+    limpar_tela()
 
-    dir_esq = true
+    term.setCursorPos(14,6)
+    write("Escavando...")
+    term.setCursorPos(10,8)
+    write(string.format("Dim: %3d x %3d x %3d",profundidade, largura, altura))
 
-    if (combustivel < (x+y+z) and turtle.getItemCount(1) < (math.floor((x+y+z)/96)+1)) then
-        encher_tanque(math.floor((x*y*z)/96)+1)
-    elseif (combustivel < (x+y+z) and turtle.getItemCount(1) >= (math.floor((x+y+z)/96)+1)) then
-        turtle.select(1)
-        turtle.refuel(math.floor((x*y*z)/96)+1)
-    end
+    local dir = direcao[1][2]
 
-    se_esvaziar()
+    for i = 1, y do 
 
- if math.fmod(y,2) ~= 0 then
+        for j = 1, z do 
 
-    for i = 1, 2 do
-        turtle.turnRight()
-    end
+            term.setCursorPos(15,11)
+            write(string.format("( %3d %% )",math.floor((vez_executada/total)*100)))
 
-        for a = 1, x-1 do
-            while not turtle.forward() do
-                turtle.dig()
+            for k = 1, x do 
+
+                while not turtle.forward() do 
+                    turtle.dig()
+                end
+
+                if turtle.getItemCount(14) > 0 then 
+                    esvaziar_inventario()
+                end
+
+            end
+
+            if j ~= z then
+
+                if dir then 
+                    turtle.turnRight()
+                    
+                    while not turtle.forward() do 
+                        turtle.dig()
+                    end
+
+                    turtle.turnRight()
+                else 
+                    turtle.turnLeft()
+                    
+                    while not turtle.forward() do 
+                        turtle.dig()
+                    end
+
+                    turtle.turnLeft()
+                end 
+                dir = not dir 
+
+            end
+
+            vez_executada = vez_executada + 1
+        end 
+
+        if i ~= y then
+            while not turtle.up() do
+                turtle.digUp()
+            end 
+            turtle.turnRight()
+            turtle.turnRight()
+        else 
+            term.setCursorPos(14,6)
+            term.clearLine()
+            write("Voltando...")
+
+            if (y % 2) == 1 then 
+                for i = 1, y-1 do 
+                    while not turtle.down() do 
+                        turtle.digDown()
+                    end 
+                end 
+
+                for i = 1, x do 
+                    if not turtle.back() then  
+                        turtle.turnRight()
+                        turtle.turnRight()
+                        
+                        while not turtle.forward() do 
+                            turtle.dig()
+                        end
+
+                        turtle.turnRight()
+                        turtle.turnRight()
+                    end 
+                end 
+
+                if dir then 
+                    turtle.turnLeft()
+                else 
+                    turtle.turnRight()
+                end 
+
+                for i = 1, z-1 do 
+                    while not turtle.forward() do 
+                        turtle.dig()
+                    end
+                end 
+
+                if dir then 
+                    turtle.turnRight()
+                else 
+                    turtle.turnLeft()
+                end
+
+                if (z % 2) == 0 then 
+                    for i = 1, x do 
+                        while not turtle.forward() do 
+                            turtle.dig()
+                        end
+                    end 
+
+                    turtle.turnRight()
+                    turtle.turnRight()
+                end
+
+            else 
+                turtle.turnRight()
+                turtle.turnRight()
+
+                for i = 1, y-1 do 
+                    turtle.down()
+                end 
             end
         end
 
-        if dir_esq == true then
+    end
+    
+end
+
+function preencher_chao(x, z)
+
+    dir = direcao[1][2]
+
+    limpar_tela()
+    term.setCursorPos(7,6)
+    write("[ Preenchendo o Chao... ]")
+
+    local function achar_bloco()
+    
+        turtle.select(1)
+
+        if turtle.refuel(1) then 
+            for k = 2, 14 do 
+                turtle.select(k)
+                if turtle.placeUp() then 
+                    turtle.digUp()
+                    return k
+                end 
+            end
+        else 
+            for k = 1, 14 do
+                turtle.select(k)
+                if turtle.placeUp() then 
+                    turtle.digUp()
+                    return k
+                end  
+            end
+        end 
+
+    end 
+
+    local slot_bloco = achar_bloco()
+
+    for i = 1, z do 
+
+        for j = 1, x do 
+
+            while not turtle.detectDown() do 
+                turtle.select(slot_bloco)
+                if not turtle.placeDown() then 
+                    slot_bloco = achar_bloco()
+                end 
+                os.sleep(0.5)
+            end 
+
+            while not turtle.forward() do 
+                turtle.dig()
+            end 
+
+        end
+
+        while not turtle.detectDown() do 
+            turtle.select(slot_bloco)
+            if not turtle.placeDown() then 
+                slot_bloco = achar_bloco()
+            end 
+            os.sleep(0.5)
+        end
+
+        if i ~= z then
+
+            if dir then 
+                turtle.turnRight()
+
+                while not turtle.forward() do 
+                    turtle.dig()
+                end
+
+                turtle.turnRight()
+            else 
+                turtle.turnLeft()
+
+                while not turtle.forward() do 
+                    turtle.dig()
+                end
+
+                turtle.turnLeft()
+            end 
+            dir = not dir 
+
+        end
+
+    end 
+
+    for i = 1, x do 
+        turtle.back()
+    end 
+
+        if dir then 
+            turtle.turnLeft()
+        else 
             turtle.turnRight()
-        elseif dir_esq == false then
+        end 
+
+    for i = 1, z-1 do 
+        turtle.forward()
+    end 
+
+        if dir then 
+            turtle.turnRight()
+        else 
             turtle.turnLeft()
         end
 
-        for b = 1, y-1 do
-            while not turtle.forward() do
-                turtle.dig()
-            end
-        end
-
-        turtle.turnRight()
-
-        for c = 1, z-1 do 
-            while not turtle.down() do
-                turtle.digDown()
-            end
-        end
-
- else 
-
-    turtle.turnRight()
-
-    for b = 1, y-1 do
-        while not turtle.forward() do
-            turtle.dig()
-        end
-    end
-
-    turtle.turnRight()
-
-    for c = 1, z-1 do 
-        while not turtle.down() do
-            turtle.digDown()
-        end
-    end
-
- end
-
 end
 
-function tampa_buraco(x,y)
+-- MENU 
 
-    dir_esq = true
-
-    se_encher(x,y,1)
-    se_esvaziar()
-
-    for b = 1, y do 
-
-        for a = 1, x-1 do
-
-            while not turtle.detectDown() do
-                turtle.select(2)
-                turtle.placeDown()
-            end
-
-            while not turtle.forward() do
-                turtle.dig()
-            end
-
-        end
-        
-        if y>1 and b ~= y then
-            
-            if dir_esq == true then
-
-                while not turtle.detectDown() do
-                    turtle.select(2)
-                    turtle.placeDown()
-                end
-
-                turtle.turnRight()
-                while not turtle.forward() do
-                    turtle.dig()
-                end
-                turtle.turnRight()
-                dir_esq = not dir_esq
-
-            elseif dir_esq == false then
-
-                while not turtle.detectDown() do
-                    turtle.select(2)
-                    turtle.placeDown()
-                end
-
-                turtle.turnLeft()
-                while not turtle.forward() do
-                    turtle.dig()
-                end
-                turtle.turnLeft()
-                dir_esq = not dir_esq
-
-            end
-
-        end
-
-        while not turtle.detectDown() do
-            turtle.select(2)
-            turtle.placeDown()
-        end
-        
-    end
-
-    voltar(x,y,1)
-
-end
-
-function criar_caixas(x,y,z)
-
-    if x == 1 and y == 1 and z == 1 then
-
-        esvaziar_inv()
-
-    else
-
-    se_encher(x,y,z)
-    se_esvaziar()
-
-    for a = 1, z do
-        
-        for b = 1, y do
-
-            for c = 1, x-1 do
-
-                while not turtle.forward() do
-                    turtle.dig()
-                end
-
-                se_esvaziar()
-
-            end
-
-            if y ~= b then
-
-            if dir_esq == true then 
-                
-                turtle.turnRight()
-                while not turtle.forward() do
-                    turtle.dig()
-                end
-                turtle.turnRight()
-                
-               dir_esq = not dir_esq
-
-            elseif dir_esq == false then
-
-                turtle.turnLeft()
-                while not turtle.forward() do
-                    turtle.dig()
-                end
-                turtle.turnLeft()
-
-                dir_esq = not dir_esq
-
-            end
-
-            end
-
-        end
-
-        voltar(x,y,1)
-
-        if z > 1 then 
-
-            while not turtle.up() do
-                turtle.digUp()
-            end
-
-        end
-
-    end
-
-    if z > 1 then
-        for a = 1, z do
-            while not turtle.down() do
-                turtle.digDown()
-            end
-        end
-    end
-    tampa_buraco(x,y)
-
-    end
-end
-
+local etapa_atual = 1
 term.clear()
 term.setCursorPos(1,1)
 
-print("\n            [Bombinha "..versao.."]")
-print("---------------------------------------\n")
-print(" =[ Dimensoes ]=\n")
+term.setCursorPos(14,2)
+write("[ Bombinha ]")
+term.setCursorPos(1,3)
+write("---------------------------------------")
 
-term.write("  PROFUNDIDADE: ")
-local profundidade = read()
+if turtle.getItemCount(16) == 0 or turtle.getItemCount(15) == 0 then  
+    term.setCursorPos(2,6)
+    write(string.format("%d. Insira os Ender Chests",etapa_atual))
+    term.setCursorPos(1,8)
+    write("Coloque o Ender Chest de entrada de itens no Slot 16 e o de Ender Chest de combustivel no Slot 15")
+    term.setCursorPos(6,12)
+    write("< Pressione algo >")
+    term.setCursorPos(28,12)
+    write("[X] - Sair")
 
-term.setCursorPos(1,10)
-term.write("  LARGURA: ")
-local largura = read()
+    local event, key = os.pullEvent("key")
 
-term.setCursorPos(1,12)
-term.write("  ALTURA: ")
-local altura = read()
+    if key == keys.x then
+        term.setCursorPos(1,1)
+        term.clear() 
+        return false
+    end
 
-if largura == nil or profundidade == nil or altura == nil then 
-    limparLinhas(6,12,6)
-    print("Essas dimensoes nao sao compativeis, por favor coloque valores validos")
+    limpar_tela()
+
+    if turtle.getItemCount(16) ~= 1 or turtle.getItemCount(15) ~= 1 then 
+        term.setCursorPos(7,7)
+        write("[ Ender Chests Faltando! ]")
+        term.setCursorPos(1,10)
+        write("Por favor coloque o bau de carvao no slot 15 e o de entrada de itens no slot 16")
+        
+        event, key = os.pullEvent("key")
+        term.setCursorPos(1,1)
+        term.clear() 
+        return false
+    end
+
+    etapa_atual = etapa_atual + 1
 end
 
-criar_caixas(tonumber(profundidade), tonumber(largura), tonumber(altura))
+limpar_tela()
+term.setCursorPos(14,7)
+write("Carregando...")
+esvaziar_inventario()
+limpar_tela()
+
+term.setCursorPos(2,6)
+write(string.format("%d. Escolha a direcao para onde cavar",etapa_atual))
+term.setCursorPos(28,12)
+write("[X] - Sair")
+
+while escolher_dir do 
+
+    for i = 1, 2 do 
+
+        if opc_selecionada == i then 
+            term.setCursorPos(2,7+i)
+            term.clearLine()
+            write("-> "..direcao[i][1])
+        else
+            term.setCursorPos(5,7+i)
+            term.clearLine()
+            write(direcao[i][1])
+        end
+
+    end
+
+    event, key = os.pullEvent("key")
+
+        if key == keys.x then 
+            return false
+        end
+
+        if key == 200 then 
+            opc_selecionada = opc_selecionada - 1
+        elseif key == 208 then 
+            opc_selecionada = opc_selecionada + 1
+        end 
+
+        if opc_selecionada > 2 then 
+            opc_selecionada = 1
+        elseif opc_selecionada < 1 then 
+            opc_selecionada = 2
+        end
+
+        if key == 28 then 
+            direcao[opc_selecionada][2] = true 
+            escolher_dir = false
+            etapa_atual = etapa_atual + 1
+        end 
+
+end
+
+limpar_tela()
+term.setCursorPos(2,6)
+write(string.format("%d. Digite as dimensoes",etapa_atual))
+
+term.setCursorPos(6,8)
+write("Profundidade: ")
+profundidade = read()
+
+if tonumber(profundidade) == nil or tonumber(profundidade) <= 0 then 
+    limpar_tela()
+    term.setCursorPos(8,10)
+    write("[ Dimensoes invalidas ]")
+    read()
+    return false
+end
+profundidade = math.floor(tonumber(profundidade))
+
+term.setCursorPos(6,10)
+write("Largura: ")
+largura = read()
+
+if tonumber(largura) == nil or tonumber(largura) <= 0 then 
+    limpar_tela()
+    term.setCursorPos(8,10)
+    write("[ Dimensoes invalidas ]")
+    read()
+    return false
+end 
+largura = math.floor(tonumber(largura))
+
+term.setCursorPos(6,12)
+write("Altura: ")
+altura = read()
+
+if tonumber(altura) == nil or tonumber(altura) <= 0 then 
+    limpar_tela()
+    term.setCursorPos(8,10)
+    write("[ Dimensoes invalidas ]")
+    read()
+    return false
+end
+altura = math.floor(tonumber(altura)) 
+
+local volume = profundidade*largura*altura
+local combustivel_faltando = (volume*2) - turtle.getFuelLevel()
+
+if volume <= 1 then 
+    limpar_tela()
+    term.setCursorPos(8,10)
+    write("[ Dimensoes invalidas ]")
+    read()
+    return false
+end
+
+if combustivel_faltando > 0 then
+
+    local carvao_faltando = math.ceil(combustivel_faltando/96)
+    
+    turtle.turnRight()
+    turtle.turnRight()
+
+    turtle.select(15)
+    while not turtle.place() do 
+        turtle.dig()
+        os.sleep(1) 
+    end 
+    turtle.select(1)
+
+    if carvao_faltando > 64 then 
+        repeat
+            turtle.suck()
+            turtle.refuel()
+            os.sleep(5)
+        until turtle.getFuelLevel() >= volume*2
+    else
+        turtle.suck()
+        turtle.refuel(carvao_faltando) 
+    end 
+
+    turtle.select(15)
+    turtle.dig()
+    turtle.select(1)
+    turtle.turnRight()
+    turtle.turnRight()
+
+end
+
+escavar(profundidade-1, largura, altura)
+limpar_tela()
+etapa_atual = etapa_atual + 1
+
+term.setCursorPos(2,6)
+write(string.format("%d. Deseja preencher o chao?",etapa_atual))
+term.setCursorPos(7,8)
+write("[S] - Sim")
+term.setCursorPos(7,10)
+write("[N] - Nao")
+
+while true do 
+
+    event, key = os.pullEvent("key")
+
+    if key == keys.s then 
+        preencher_chao(profundidade-1, largura)
+        break
+    elseif key == keys.n then 
+        break 
+    end
+
+end
+
+limpar_tela()
+term.setCursorPos(13,8)
+write("Encerrando...")
+os.sleep(1)
+term.setCursorPos(11,10)
+write("Ate a proxima! =]")
+
+    esvaziar_inventario()
+    turtle.select(15)
+    turtle.place()
+        for i = 1, 16, 15 do 
+            turtle.select(i)
+            turtle.drop()
+        end 
+    turtle.select(1)
+    turtle.dig()
+
+os.sleep(0.1)
+term.setCursorPos(1,1)
+term.clear()

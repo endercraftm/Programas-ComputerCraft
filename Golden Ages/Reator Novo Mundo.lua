@@ -124,18 +124,24 @@ function reator()
 
 end
 
-term.clear()
-term.setCursorPos(1,0)
-print("<=================+=================>")
-for i = 2, 17 do
-term.setCursorPos(1,i)
-write("|                                  |\n")
+function menu()
+
+    term.clear()
+    term.setCursorPos(1,0)
+    write("+-----------------------------------+\n")
+
+        for i = 0, 19 do
+        term.setCursorPos(1,2+i)
+        write("|")
+        term.setCursorPos(37,2+i)
+        term.write("|")
+        end
+
+    term.setCursorPos(1,17)
+    write("+-----------------------------------+")
+
 end
-term.setCursorPos(1,5)
-term.write("<=================+=================>")
-term.setCursorPos(1,18)
-term.write("<=================+=================>")
-term.setCursorPos(9,3)
-term.write("[ Reator Novo Mundo ]")
+
+menu()
 
 parallel.waitForAll(sair_programa,calor,reator)
