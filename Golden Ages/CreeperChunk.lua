@@ -1,7 +1,8 @@
 -- TODO: 
+-- Complemento Chunk para o Mover por Comandos
 -- Documentar o Mover por Comandos e algumas partes do Mover Manual
+-- Criar Quarry
 -- Criar intro ASCII do Creeper cada vez que o programa é aberto
--- Status de progressão da Quarry
 
 --[ VARIAVEIS ]
 
@@ -10,11 +11,7 @@ local versao = 1.2
 
 local coords_broca = {X = 0, Y = 0, Z = 0}
 local coords_quarry = {X = 0, Y = 0, Z = 0}
-local broca_max_esq = 0
-local broca_max_dir = 0 
-local broca_min_alt = 0 
-local pos_broca = 0
-local primeira_vez = true
+local broca_max_esq, broca_max_dir, broca_min_alt, pos_broca
 
 local coresQuarry = {
     frente = colors.lime,
@@ -142,39 +139,23 @@ function menus(opc)
         term.setCursorPos(4,17)
         write("Para onde voce deseja ir?\n")
 
-    
     elseif (opc == 3) then
-
         term.setCursorPos(23,3) 
         write("Quarry")
         term.setCursorPos(2,5)
         write("+-----------------------------------------------+")
-        -- term.setCursorPos(9,9)
-        -- write("Quantas camadas voce deseja cavar?")
-        term.setCursorPos(12,7)
-        write("Qual modo voce deseja usar?")
-        term.setCursorPos(8,9)
-        write("[1] - Automatico       [2] - Manual")
-        term.setCursorPos(8,10)
-        write("[3] - Furar")
-        -- term.setCursorPos(23,11)
-        -- write("> ")
+        term.setCursorPos(9,9)
+        write("Quantas camadas voce deseja cavar?")
+        term.setCursorPos(23,11)
+        write("> ")
 
     end
 
 end
 
-function atualizar_coords()
+function atualizar_coords_broca()
     rednet.open("right")
-
-    while (coords_quarry.X == 0 or coords_quarry.Y == 0) do
-        coords_quarry.X, coords_quarry.Y, coords_quarry.Z = gps.locate(3)    
-    end
-
-    broca_max_dir = coords_quarry.X + 10
-    broca_max_esq = coords_quarry.X - 3
-    broca_min_alt = coords_quarry.Y - 18
-
+    coords_quarry.X, coords_quarry.Y, coords_quarry.Z = gps.locate(3)
     rednet.send(8, "coords")
 
     local id, msg, dist, coordenadas
@@ -195,6 +176,9 @@ function atualizar_coords()
     coords_broca.Y = tonumber(string.match(coordenadas, " %d+ "))
     coords_broca.Z = tonumber(string.match(coordenadas, "%d+$"))
 
+    broca_max_dir = coords_quarry.X + 10
+    broca_max_esq = coords_quarry.X - 3
+    broca_min_alt = coords_quarry.Y - 18
     pos_broca = coords_broca.X - broca_max_esq
  
 end
@@ -234,25 +218,21 @@ function moverManual()
 
     repeat 
 
+        atualizar_coords_broca()
+
         local event, key = os.pullEvent("key")
     
         if (key == keys.w) then
-                broca_max_esq = 0
-                broca_max_dir = 0
                 moverQuarry(coresQuarry.frente, 1, "manual")
             elseif (key == keys.s) then
-                broca_max_esq = 0
-                broca_max_dir = 0
                 moverQuarry(coresQuarry.atras, 1, "manual")
             elseif (key == keys.d) then
                 moverQuarry(coresQuarry.direita, 1, "manual")
             elseif (key == keys.a) then
                 moverQuarry(coresQuarry.esquerda, 1, "manual")
             elseif (key == keys.space) then
-                broca_min_alt = 0
                 moverQuarry(coresQuarry.subir, 1, "manual")
             elseif (key == keys.leftShift) then
-                broca_min_alt = 0
                 moverQuarry(coresQuarry.descer, 1, "manual")
             elseif (key == keys.up) then
                 moverQuarry(coresQuarry.subirB, 1, "manual")
@@ -265,13 +245,10 @@ function moverManual()
             elseif (key == keys.enter) then
                 moverQuarry(coresQuarry.quebrar, 1, "manual") 
             elseif (key == keys.pageUp) then
-                atualizar_coords()
                 moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
             elseif (key == keys.pageDown) then
-                atualizar_coords()
-                moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq, "manual")   
+                moverQuarry(coresQuarry.esquerdaB, coords_broca.X - broca_max_esq, "manual") 
             elseif (key == keys.home) then
-                atualizar_coords()
                 moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")   
         end
     
@@ -282,8 +259,6 @@ end
 function moverComando()
 
     repeat
-
-        atualizar_coords()
 
         term.setCursorPos(4,18)
         write("> ") 
@@ -319,64 +294,60 @@ function moverComando()
             
         end
         
-        local parametros_comando = {acharComandos(1), acharComandos(2), tonumber(string.match(ler_comando, "%d+$"))}
+        local parametros_comando = {
+            acharComandos(1),
+            acharComandos(2),
+            tonumber(string.match(ler_comando, "%d+$"))
+        }
 
         if (parametros_comando[1] == nil) then
             print("erro sem parametro 1")
         else
+                if (parametros_comando[2] == "broca") then
 
-            if (parametros_comando[2] == "broca") then
+                    if (parametros_comando[1] == "direita") then
+                        moverQuarry(coresQuarry.direitaB, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "esquerda") then
+                        moverQuarry(coresQuarry.esquerdaB, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "subir" or parametros_comando[1] == "atras") then
+                        moverQuarry(coresQuarry.subirB, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "descer" or parametros_comando[1] == "frente") then
+                        moverQuarry(coresQuarry.descerB, parametros_comando[3], "comando")
+                    end
 
-                if (parametros_comando[1] == "direita") then
-                    moverQuarry(coresQuarry.direitaB, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "esquerda") then
-                    moverQuarry(coresQuarry.esquerdaB, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "subir" or parametros_comando[1] == "atras") then
-                    moverQuarry(coresQuarry.subirB, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "descer" or parametros_comando[1] == "frente") then
-                    moverQuarry(coresQuarry.descerB, parametros_comando[3], "comando")
-                end
+                elseif (parametros_comando[2] == "chunk" or parametros_comando[2] == "chunks") then 
 
-            elseif (parametros_comando[2] == "chunk" or parametros_comando[2] == "chunks") then 
+                    if (parametros_comando[1] == "frente") then 
+                        moverQuarry(coresQuarry.frente, parametros_comando[3]*16, "comando")
+                    elseif (parametros_comando[1] == "atras") then
+                        moverQuarry(coresQuarry.atras, parametros_comando[3]*16, "comando")
+                    elseif (parametros_comando[1] == "direita") then
+                        moverQuarry(coresQuarry.direita, parametros_comando[3]*16, "comando")
+                    elseif (parametros_comando[1] == "esquerda") then
+                        moverQuarry(coresQuarry.esquerda, parametros_comando[3]*16, "comando")
+                    elseif (parametros_comando[1] == "subir") then
+                        moverQuarry(coresQuarry.subir, parametros_comando[3]*16, "comando")
+                    elseif (parametros_comando[1] == "descer") then
+                        moverQuarry(coresQuarry.descer, parametros_comando[3]*16, "comando")
+                    end
 
-                if (parametros_comando[1] == "frente") then 
-                    broca_max_esq = 0
-                    broca_max_dir = 0
-                    moverQuarry(coresQuarry.frente, parametros_comando[3]*16, "comando")
-                elseif (parametros_comando[1] == "atras") then
-                    broca_max_esq = 0
-                    broca_max_dir = 0
-                    moverQuarry(coresQuarry.atras, parametros_comando[3]*16, "comando")
-                elseif (parametros_comando[1] == "direita") then
-                    moverQuarry(coresQuarry.direita, parametros_comando[3]*16, "comando")
-                elseif (parametros_comando[1] == "esquerda") then
-                    moverQuarry(coresQuarry.esquerda, parametros_comando[3]*16, "comando")
-                elseif (parametros_comando[1] == "subir") then
-                    broca_min_alt = 0
-                    moverQuarry(coresQuarry.subir, parametros_comando[3]*16, "comando")
-                elseif (parametros_comando[1] == "descer") then
-                    broca_min_alt = 0
-                    moverQuarry(coresQuarry.descer, parametros_comando[3]*16, "comando")
-                end
+                else
 
-            else
+                    if (parametros_comando[1] == "frente") then 
+                        moverQuarry(coresQuarry.frente, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "atras") then
+                        moverQuarry(coresQuarry.atras, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "direita") then
+                        moverQuarry(coresQuarry.direita, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "esquerda") then
+                        moverQuarry(coresQuarry.esquerda, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "subir") then
+                        moverQuarry(coresQuarry.subir, parametros_comando[3], "comando")
+                    elseif (parametros_comando[1] == "descer") then
+                        moverQuarry(coresQuarry.descer, parametros_comando[3], "comando")
+                    end
 
-                if (parametros_comando[1] == "frente") then 
-                    moverQuarry(coresQuarry.frente, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "atras") then
-                    moverQuarry(coresQuarry.atras, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "direita") then
-                    moverQuarry(coresQuarry.direita, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "esquerda") then
-                    moverQuarry(coresQuarry.esquerda, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "subir") then
-                    moverQuarry(coresQuarry.subir, parametros_comando[3], "comando")
-                elseif (parametros_comando[1] == "descer") then
-                    moverQuarry(coresQuarry.descer, parametros_comando[3], "comando")
-                end
-
-            end 
-        
+                end 
         end
 
     until (ler_comando == "x")
@@ -384,56 +355,14 @@ end
 
 function Quarry()
 
-    atualizar_coords()
-    local event, key = os.pullEvent("key")
-    local ler_camadas
-    
-    if (key == 2) then
-
-        term.setCursorPos(16,3) 
-        write("Quarry - Automatico")
-        ler_camadas = coords_broca.Y - 7
-
-    elseif (key == 3) then
-
-        term.setCursorPos(18,3) 
-        write("Quarry - Manual")
-        term.setCursorPos(12,7)
-        write("                           ")
-        term.setCursorPos(8,9)
-        write("Quantas camadas voce deseja cavar? ")
-        term.setCursorPos(23,11)
-        write("> ")
-        ler_camadas = read() 
-        ler_camadas = tonumber(ler_camadas)
-
-        if (ler_camadas == nil or ler_camadas <= 0) then
-            return false
-        end
-
-    elseif (key == 4) then
-
-        term.setCursorPos(18,3) 
-        write("Quarry - Furar  ")
-        ler_camadas = coords_broca.Y - 8
-        
-        for i = 1, ler_camadas do
-            moverQuarry(coresQuarry.quebrar)
-            moverQuarry(coresQuarry.descerB)
-        end
-        moverQuarry(coresQuarry.quebrar)
-
-        atualizar_coords()
-        moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")
-        moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
-
-        return true
-
-    else
+    local ler_camadas = read() 
+     
+    if (tonumber(ler_camadas) == nil) then
         return false
     end
-    
+
     local lado_broca
+    atualizar_coords_broca()
 
     if (pos_broca == 13) then
         lado_broca = true
@@ -449,47 +378,41 @@ function Quarry()
     
     for c = 1, ler_camadas do 
 
-        if (lado_broca == true) then
+        for i = 1, 13 do
 
-            for i = 1, 13 do
-
-                moverQuarry(coresQuarry.quebrar)
+            if (lado_broca == true) then
                 moverQuarry(coresQuarry.esquerdaB)
-    
-            end
-            moverQuarry(coresQuarry.quebrar)
-            moverQuarry(coresQuarry.descerB)
-
-        elseif (lado_broca == false) then
-
-            for i = 1, 13 do
-
-                moverQuarry(coresQuarry.quebrar)
+            else 
                 moverQuarry(coresQuarry.direitaB)
-    
             end
             moverQuarry(coresQuarry.quebrar)
-            moverQuarry(coresQuarry.descerB)
-            
+
         end
         
+        moverQuarry(coresQuarry.descerB)
+
+        atualizar_coords_broca()
         lado_broca = not lado_broca
 
     end
 
-    atualizar_coords()
-    moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y, "manual")
-    moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X, "manual")
+    moverQuarry(coresQuarry.subirB, broca_min_alt - coords_broca.Y)
+    moverQuarry(coresQuarry.direitaB, broca_max_dir - coords_broca.X)
+
+    -- print("Broca X = ", coords_broca.X)
+    -- print("Quarry X = ", coords_quarry.X)
+    -- print("Broxa_max_dir = ", broca_max_dir)
+    -- print("Diferenca = ", broca_max_dir - coords_broca.X)
 
 end
 
 --[ INICIO ]
 
 menus(0)
+atualizar_coords_broca()
 
 repeat
 
-atualizar_coords()
 local event, key = os.pullEvent("key")
 
 if (key == keys.a) then
@@ -506,9 +429,5 @@ if (key == keys.a) then
         menus(0)
 end
 
-if (primeira_vez == true) then
-    primeira_vez = false
-end
-
 until (key == keys.x or key == keys.d)
-rednet.close("right")
+
