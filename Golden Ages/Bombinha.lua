@@ -1,6 +1,5 @@
 -- TODO:
 -- Documentação
-
 -- VARIÁVEIS
 
 local profundidade, largura, altura
