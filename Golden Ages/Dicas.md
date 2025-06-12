@@ -23,6 +23,7 @@ Aqui vou postar algumas dicas e recomendações para quem quiser jogar o meu mod
 - Branches perigosas (Ranking): Nuclear, Austere, Volcanic, Energetic, Hostile, Infernal, Virulent, Tropical
 - Acclimatiser funciona de modo completamente aleatório
 - Splicers (aparentemente) não consomem nenhum Liquid DNA
+- Sempre que achar uma Hive colete as abelhas com um Scoop, principalmente as Swamp Hives, isso te poupará tempo futuramente na busca de certas branches
 ## Thaumcraft
 ## RedPower
 - Frame Quarrys de larga escala custam muitos recursos para serem feitas, recomendo fazer no final de um Midgame ou começo de um Endgame
