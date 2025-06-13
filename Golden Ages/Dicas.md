@@ -9,6 +9,7 @@ Aqui vou postar algumas dicas e recomendações para quem quiser jogar o meu mod
 - A combinação de uma Drill + Batpack compensa muito mais do que usar picaretas
 - Tome cuidado com a voltagem, isso pode fazer você perder máquinas bem caras
 - Os paineis solares do Compact Solars podem ser quebrados com picaretas normalmente
+- O modo de vôo da GraviChest não funciona com o Equivalent Exchange instalado 
 
 ## Forestry
 - Use muito o Extra Bees, principalmente em branches mais avançadas ele vira absolutamente necessário. É necessário ter uma geração decente de MJ para usar o Extra Bees
@@ -24,6 +25,7 @@ Aqui vou postar algumas dicas e recomendações para quem quiser jogar o meu mod
 - Acclimatiser funciona de modo completamente aleatório
 - Splicers (aparentemente) não consomem nenhum Liquid DNA
 - Sempre que achar uma Hive colete as abelhas com um Scoop, principalmente as Swamp Hives, isso te poupará tempo futuramente na busca de certas branches
+- Para iniciar no addon Vis Bees você precisa de uma abelha Depleted, que pode ser encontrada quebrando Swamp Hives ou misturando uma Common com uma Noble
 ## Thaumcraft
 ## RedPower
 - Frame Quarrys de larga escala custam muitos recursos para serem feitas, recomendo fazer no final de um Midgame ou começo de um Endgame
