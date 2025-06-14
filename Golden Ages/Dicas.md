@@ -27,6 +27,8 @@ Aqui vou postar algumas dicas e recomendações para quem quiser jogar o meu mod
 - Sempre que achar uma Hive colete as abelhas com um Scoop, principalmente as Swamp Hives, isso te poupará tempo futuramente na busca de certas branches
 - Para iniciar no addon Vis Bees você precisa de uma abelha Depleted, que pode ser encontrada quebrando Swamp Hives ou misturando uma Common com uma Noble
 ## Thaumcraft
+- Recomendo não quebrar os cristais elementais, exceto os de Taint
+- 
 ## RedPower
 - Frame Quarrys de larga escala custam muitos recursos para serem feitas, recomendo fazer no final de um Midgame ou começo de um Endgame
 - Usando o Wool Card você pode transformar uma lã de qualquer cor em 4 linhas
